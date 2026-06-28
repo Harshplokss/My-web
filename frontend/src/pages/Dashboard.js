@@ -194,10 +194,17 @@ function LevelCard({ lvl, index }) {
           )}
         </div>
         <div>
-          <h3 className="font-display text-2xl sm:text-3xl">{lvl.title}</h3>
-          <p className="text-sm text-gray-400 mt-2">{lvl.subtitle}</p>
+          <h3 className="font-display text-3xl sm:text-4xl">Level {lvl.number}</h3>
+          <div className="mt-4 space-y-2">
+            {Array.from({ length: lvl.total_questions }).map((_, qi) => (
+              <div key={qi} className="flex items-center gap-2 text-sm text-gray-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]/60" />
+                Question {qi + 1}
+              </div>
+            ))}
+          </div>
           <div className="flex items-center justify-between mt-5">
-            <span className="text-xs text-gray-500">{lvl.total_questions} riddles</span>
+            <span className="text-xs text-gray-500">{lvl.total_questions} questions</span>
             {!locked && (
               <span className="flex items-center gap-1 text-sm text-[#D4AF37] font-medium">
                 Enter <ChevronRight size={16} />

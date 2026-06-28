@@ -97,8 +97,8 @@ export default function LevelPlay() {
         <div className="max-w-xl mx-auto px-6 py-20 text-center">
           <Sparkles className="text-[#D4AF37] mx-auto" size={48} />
           <p className="font-accent text-xs tracking-[0.35em] text-[#D4AF37] mt-6">LEVEL {data.level.number} COMPLETE</p>
-          <h2 className="font-display text-4xl sm:text-5xl mt-4">{data.level.title} — Conquered</h2>
-          <p className="text-gray-400 mt-4">{data.level.subtitle}</p>
+          <h2 className="font-display text-4xl sm:text-5xl mt-4">Chamber Sealed</h2>
+          <p className="text-gray-400 mt-4">Every question conquered. The next gate opens for you.</p>
           <div className="mt-8 flex gap-3 justify-center">
             <button onClick={() => navigate("/dashboard")} className="btn-ghost" data-testid="back-dashboard-btn">Back to Map</button>
             {levelNum < 5 && (
@@ -131,9 +131,8 @@ export default function LevelPlay() {
         </button>
 
         <div className="mt-6">
-          <p className="font-accent text-xs tracking-[0.35em] text-[#D4AF37]">LEVEL {data.level.number} · RIDDLE {idx + 1} / {totalQ}</p>
-          <h1 className="font-display text-3xl sm:text-4xl mt-3">{data.level.title}</h1>
-          <p className="text-gray-400 mt-1 text-sm">{data.level.subtitle}</p>
+          <p className="font-accent text-xs tracking-[0.35em] text-[#D4AF37]">LEVEL {data.level.number} · QUESTION {idx + 1} / {totalQ}</p>
+          <h1 className="font-display text-3xl sm:text-4xl mt-3">Level {data.level.number}</h1>
         </div>
 
         <div className="mt-5 tt-progress">
