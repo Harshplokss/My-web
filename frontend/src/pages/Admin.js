@@ -41,6 +41,8 @@ export default function Admin() {
 function LevelsTab() {
   const [levels, setLevels] = useState([]);
   const [editing, setEditing] = useState(null); // question being edited
+  const [confirmDel, setConfirmDel] = useState(null); // {levelId, questionId} pending confirm
+  const [confirmLvlDel, setConfirmLvlDel] = useState(null);
 
   const load = async () => {
     const r = await api.get("/admin/levels");
@@ -54,10 +56,19 @@ function LevelsTab() {
     load();
   };
   const deleteLvl = async (lvl) => {
-    if (!window.confirm(`Delete level ${lvl.number}?`)) return;
-    await api.delete(`/admin/levels/${lvl.level_id}`);
-    toast.success("Level deleted");
-    load();
+    if (confirmLvlDel !== lvl.level_id) {
+      setConfirmLvlDel(lvl.level_id);
+      setTimeout(() => setConfirmLvlDel((cur) => (cur === lvl.level_id ? null : cur)), 4000);
+      return;
+    }
+    try {
+      await api.delete(`/admin/levels/${lvl.level_id}`);
+      toast.success("Level deleted");
+      setConfirmLvlDel(null);
+      load();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Delete failed");
+    }
   };
   const addLvl = async () => {
     const next = (levels[levels.length - 1]?.number || 0) + 1;
@@ -86,10 +97,20 @@ function LevelsTab() {
     }
   };
   const deleteQuestion = async (lvl, q) => {
-    if (!window.confirm("Delete this question?")) return;
-    await api.delete(`/admin/levels/${lvl.level_id}/questions/${q.question_id}`);
-    toast.success("Question deleted");
-    load();
+    const key = `${lvl.level_id}:${q.question_id}`;
+    if (confirmDel !== key) {
+      setConfirmDel(key);
+      setTimeout(() => setConfirmDel((cur) => (cur === key ? null : cur)), 4000);
+      return;
+    }
+    try {
+      await api.delete(`/admin/levels/${lvl.level_id}/questions/${q.question_id}`);
+      toast.success("Question deleted");
+      setConfirmDel(null);
+      load();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Delete failed");
+    }
   };
 
   return (
@@ -121,7 +142,14 @@ function LevelsTab() {
                 <button onClick={() => toggleLock(lvl)} className="btn-ghost flex items-center gap-2" title="Toggle lock" data-testid={`toggle-lock-${lvl.number}`}>
                   {lvl.is_locked_override ? <Lock size={14} /> : <Unlock size={14} />} {lvl.is_locked_override ? "Locked" : "Open"}
                 </button>
-                <button onClick={() => deleteLvl(lvl)} className="text-red-400 hover:text-red-300 p-2"><Trash2 size={16} /></button>
+                <button
+                  onClick={() => deleteLvl(lvl)}
+                  className={`p-2 rounded-md transition ${confirmLvlDel === lvl.level_id ? "bg-red-500 text-white" : "text-red-400 hover:text-red-300"}`}
+                  data-testid={`delete-level-${lvl.number}`}
+                  title={confirmLvlDel === lvl.level_id ? "Click again to confirm" : "Delete level"}
+                >
+                  {confirmLvlDel === lvl.level_id ? <span className="text-[10px] font-accent tracking-widest px-1">CONFIRM</span> : <Trash2 size={16} />}
+                </button>
               </div>
             </div>
 
@@ -137,7 +165,16 @@ function LevelsTab() {
                   )}
                   <span className="text-sm text-gray-200 flex-1 truncate">{q.prompt}</span>
                   <button onClick={() => editQuestion(lvl, q)} className="text-xs text-[#D4AF37] hover:text-[#FDE047]" data-testid={`edit-q-${lvl.number}-${i}`}>Edit</button>
-                  <button onClick={() => deleteQuestion(lvl, q)} className="text-red-400 hover:text-red-300"><Trash2 size={14} /></button>
+                  <button
+                    onClick={() => deleteQuestion(lvl, q)}
+                    className={`px-2 py-1 rounded transition ${confirmDel === `${lvl.level_id}:${q.question_id}` ? "bg-red-500 text-white" : "text-red-400 hover:text-red-300"}`}
+                    data-testid={`delete-q-${lvl.number}-${i}`}
+                    title={confirmDel === `${lvl.level_id}:${q.question_id}` ? "Click again to confirm" : "Delete question"}
+                  >
+                    {confirmDel === `${lvl.level_id}:${q.question_id}`
+                      ? <span className="text-[10px] font-accent tracking-widest">CONFIRM</span>
+                      : <Trash2 size={14} />}
+                  </button>
                 </div>
               ))}
               <button onClick={() => addQuestion(lvl)} className="text-sm text-[#D4AF37] hover:text-[#FDE047] flex items-center gap-1" data-testid={`add-q-${lvl.number}`}>
@@ -217,16 +254,26 @@ function QuestionEditor({ editing, setEditing, saveQuestion }) {
 
 function UsersTab() {
   const [users, setUsers] = useState([]);
+  const [confirmReset, setConfirmReset] = useState(null);
   const load = async () => {
     const r = await api.get("/admin/users");
     setUsers(r.data.users);
   };
   useEffect(() => { load(); }, []);
   const reset = async (u) => {
-    if (!window.confirm(`Reset progress for ${u.name}?`)) return;
-    await api.post(`/admin/users/${u.user_id}/reset`);
-    toast.success("Progress reset");
-    load();
+    if (confirmReset !== u.user_id) {
+      setConfirmReset(u.user_id);
+      setTimeout(() => setConfirmReset((cur) => (cur === u.user_id ? null : cur)), 4000);
+      return;
+    }
+    try {
+      await api.post(`/admin/users/${u.user_id}/reset`);
+      toast.success(`${u.name}'s progress reset`);
+      setConfirmReset(null);
+      load();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Reset failed");
+    }
   };
   return (
     <div>
@@ -259,8 +306,14 @@ function UsersTab() {
                 <td className="px-4 py-3">{(u.completed_levels || []).length}</td>
                 <td className="px-4 py-3 text-[#D4AF37] font-medium">{u.score}</td>
                 <td className="px-4 py-3 text-right">
-                  <button onClick={() => reset(u)} className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1 ml-auto">
-                    <RotateCcw size={12} /> Reset
+                  <button
+                    onClick={() => reset(u)}
+                    className={`text-xs flex items-center gap-1 ml-auto px-2 py-1 rounded transition ${
+                      confirmReset === u.user_id ? "bg-red-500 text-white" : "text-red-400 hover:text-red-300"
+                    }`}
+                    data-testid={`reset-user-${u.user_id}`}
+                  >
+                    <RotateCcw size={12} /> {confirmReset === u.user_id ? "Confirm" : "Reset"}
                   </button>
                 </td>
               </tr>
