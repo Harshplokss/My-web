@@ -151,13 +151,13 @@ async def auth_session(request: Request, response: Response):
 
     # Find or create user
     existing = await db.users.find_one({"email": email}, {"_id": 0})
-    # admin: explicit list, OR first ever user
-    user_count = await db.users.count_documents({})
-    is_admin = (email in ADMIN_EMAILS) or (user_count == 0)
+    # admin: only emails listed in ADMIN_EMAILS env var
+    is_admin = email in ADMIN_EMAILS
     if existing:
         user_id = existing["user_id"]
-        if is_admin and not existing.get("is_admin"):
-            await db.users.update_one({"user_id": user_id}, {"$set": {"is_admin": True}})
+        # Sync admin flag with ADMIN_EMAILS on every login (promote AND demote)
+        if bool(existing.get("is_admin")) != is_admin:
+            await db.users.update_one({"user_id": user_id}, {"$set": {"is_admin": is_admin}})
         # always refresh name/picture
         await db.users.update_one({"user_id": user_id}, {"$set": {"name": name, "picture": picture}})
     else:
