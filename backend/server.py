@@ -39,6 +39,7 @@ class User(BaseModel):
     name: str
     picture: Optional[str] = None
     is_admin: bool = False
+    team: Optional[Literal["red", "blue"]] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class Question(BaseModel):
@@ -50,6 +51,7 @@ class Question(BaseModel):
     options: List[str] = []  # for multiple choice
     answer: str  # canonical answer (lowercased compare)
     order: int = 0
+    is_draft: bool = False  # hidden from players when True
 
 class Level(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -120,6 +122,11 @@ async def get_or_create_progress(user_id: str) -> dict:
         await db.progress.insert_one(doc)
         p = await db.progress.find_one({"user_id": user_id}, {"_id": 0})
     return p
+
+def visible_questions(lvl: dict) -> list:
+    """Player-facing question list — hides drafts, preserves order."""
+    qs = [q for q in lvl.get("questions", []) if not q.get("is_draft")]
+    return sorted(qs, key=lambda q: q.get("order", 0))
 
 # ===== Auth =====
 @api.post("/auth/session")
@@ -208,7 +215,7 @@ async def list_levels(request: Request):
             "number": n,
             "title": lvl["title"],
             "subtitle": lvl.get("subtitle", ""),
-            "total_questions": len(lvl.get("questions", [])),
+            "total_questions": len(visible_questions(lvl)),
             "unlocked": unlocked,
             "completed": is_completed,
         })
@@ -219,11 +226,8 @@ async def get_progress(request: Request):
     user = await require_user(request)
     prog = await get_or_create_progress(user["user_id"])
     total_levels = await db.levels.count_documents({})
-    total_questions_doc = await db.levels.aggregate([
-        {"$project": {"q": {"$size": "$questions"}}},
-        {"$group": {"_id": None, "total": {"$sum": "$q"}}},
-    ]).to_list(1)
-    total_questions = total_questions_doc[0]["total"] if total_questions_doc else 0
+    levels_all = await db.levels.find({}, {"_id": 0}).to_list(100)
+    total_questions = sum(len(visible_questions(lv)) for lv in levels_all)
     # questions answered correctly
     answered = 0
     for log in prog.get("answers_log", []):
@@ -243,6 +247,7 @@ async def get_progress(request: Request):
         "completed_all": completed_all,
         "started_at": prog.get("started_at"),
         "completed_at": prog.get("completed_at"),
+        "team": user.get("team"),
     }
 
 @api.get("/levels/{number}/question")
@@ -262,7 +267,7 @@ async def get_current_question(number: int, request: Request):
         raise HTTPException(status_code=404, detail="Level not found")
     if lvl.get("is_locked_override"):
         raise HTTPException(status_code=403, detail="Level locked by admin")
-    questions = sorted(lvl.get("questions", []), key=lambda q: q.get("order", 0))
+    questions = visible_questions(lvl)
     if number in completed:
         return {"level_completed": True, "level": {"number": number, "title": lvl["title"], "subtitle": lvl.get("subtitle", "")}}
     q_idx = prog.get("current_question_index", 0) if number == current else 0
@@ -301,7 +306,7 @@ async def submit_answer(number: int, request: Request):
     lvl = await db.levels.find_one({"number": number}, {"_id": 0})
     if not lvl or lvl.get("is_locked_override"):
         raise HTTPException(status_code=403, detail="Level unavailable")
-    questions = sorted(lvl.get("questions", []), key=lambda q: q.get("order", 0))
+    questions = visible_questions(lvl)
     q_idx = prog.get("current_question_index", 0)
     if q_idx >= len(questions):
         return {"correct": True, "level_completed": True}
@@ -360,12 +365,39 @@ async def leaderboard(request: Request):
         rows.append({
             "name": u.get("name", "Anonymous"),
             "picture": u.get("picture"),
+            "team": u.get("team"),
             "score": p.get("score", 0),
             "levels_completed": len(p.get("completed_levels", [])),
             "completed_at": p.get("completed_at"),
         })
     rows.sort(key=lambda r: (-r["levels_completed"], -r["score"]))
     return {"rows": rows[:50]}
+
+@api.get("/teams/standings")
+async def team_standings(request: Request):
+    await require_user(request)
+    users = await db.users.find({"team": {"$in": ["red", "blue"]}}, {"_id": 0}).to_list(1000)
+    progs = await db.progress.find({}, {"_id": 0}).to_list(1000)
+    prog_map = {p["user_id"]: p for p in progs}
+    totals = {"red": {"score": 0, "members": 0, "levels": 0}, "blue": {"score": 0, "members": 0, "levels": 0}}
+    for u in users:
+        t = u["team"]
+        p = prog_map.get(u["user_id"], {})
+        totals[t]["score"] += p.get("score", 0)
+        totals[t]["levels"] += len(p.get("completed_levels", []))
+        totals[t]["members"] += 1
+    return totals
+
+@api.post("/me/team")
+async def set_team(request: Request):
+    user = await require_user(request)
+    body = await request.json()
+    team = (body.get("team") or "").lower()
+    if team not in ("red", "blue"):
+        raise HTTPException(status_code=400, detail="team must be 'red' or 'blue'")
+    # Allow first-time set OR switching (admin discretion - keep simple: allow change)
+    await db.users.update_one({"user_id": user["user_id"]}, {"$set": {"team": team}})
+    return {"ok": True, "team": team}
 
 @api.get("/final")
 async def final_data(request: Request):
@@ -479,6 +511,7 @@ async def admin_add_question(level_id: str, request: Request):
         options=body.get("options", []),
         answer=body["answer"],
         order=int(body.get("order", len(lvl.get("questions", [])))),
+        is_draft=bool(body.get("is_draft", False)),
     )
     await db.levels.update_one({"level_id": level_id}, {"$push": {"questions": q.model_dump()}})
     return q.model_dump()
@@ -488,7 +521,7 @@ async def admin_update_question(level_id: str, question_id: str, request: Reques
     await require_admin(request)
     body = await request.json()
     set_fields = {}
-    for k in ["type", "prompt", "image_url", "options", "answer", "order"]:
+    for k in ["type", "prompt", "image_url", "options", "answer", "order", "is_draft"]:
         if k in body:
             set_fields[f"questions.$.{k}"] = body[k]
     await db.levels.update_one(

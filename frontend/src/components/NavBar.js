@@ -28,7 +28,21 @@ export default function NavBar() {
         {user && (
           <div className="flex items-center gap-3">
             {user.picture && <img src={user.picture} alt="" className="w-8 h-8 rounded-full border border-[#D4AF37]/40" />}
-            <span className="text-sm hidden md:inline text-gray-300" data-testid="nav-user-name">{user.name}</span>
+            <div className="hidden md:flex items-center gap-2">
+              <span className="text-sm text-gray-300" data-testid="nav-user-name">{user.name}</span>
+              {user.team && (
+                <span
+                  data-testid="nav-team-badge"
+                  className={`font-accent text-[9px] tracking-[0.25em] px-2 py-0.5 rounded-full border ${
+                    user.team === "red"
+                      ? "border-red-500/40 text-red-300 bg-red-500/10"
+                      : "border-blue-400/40 text-blue-200 bg-blue-500/10"
+                  }`}
+                >
+                  {user.team.toUpperCase()}
+                </span>
+              )}
+            </div>
             <button onClick={logout} className="text-gray-400 hover:text-red-400 transition" title="Sign out" data-testid="nav-logout">
               <LogOut size={18} />
             </button>

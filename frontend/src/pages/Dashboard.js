@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Lock, Check, ChevronRight, Award, Flame, Trophy } from "lucide-react";
+import { Lock, Check, ChevronRight, Award, Flame, Trophy, Shield } from "lucide-react";
+import { toast } from "sonner";
 import NavBar from "../components/NavBar";
 import { api } from "../lib/api";
+import { useAuth } from "../context/AuthContext";
 
 const LEVEL_BG = {
   1: "https://images.pexels.com/photos/11336947/pexels-photo-11336947.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
@@ -26,21 +28,26 @@ export default function Dashboard() {
   const [data, setData] = useState(null);
   const [levels, setLevels] = useState([]);
   const navigate = useNavigate();
+  const { checkAuth } = useAuth();
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const [pRes, lRes] = await Promise.all([api.get("/progress"), api.get("/levels")]);
-        setData(pRes.data);
-        setLevels(lRes.data.levels);
-        if (pRes.data.completed_all) {
-          // Auto-direct to celebration when everything is done? leave manual.
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    })();
-  }, []);
+  const load = async () => {
+    const [pRes, lRes] = await Promise.all([api.get("/progress"), api.get("/levels")]);
+    setData(pRes.data);
+    setLevels(lRes.data.levels);
+  };
+
+  useEffect(() => { load().catch(console.error); }, []);
+
+  const pickTeam = async (team) => {
+    try {
+      await api.post("/me/team", { team });
+      toast.success(`Welcome to Team ${team.toUpperCase()}!`);
+      await checkAuth();
+      await load();
+    } catch {
+      toast.error("Could not set team");
+    }
+  };
 
   if (!data) {
     return (
@@ -55,10 +62,25 @@ export default function Dashboard() {
   return (
     <div className="relative z-10 min-h-screen">
       <NavBar />
+      {!data.team && <TeamPicker onPick={pickTeam} />}
       <main className="max-w-6xl mx-auto px-6 sm:px-10 py-10">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <p className="font-accent text-xs tracking-[0.35em] text-[#D4AF37]/80">◆ WELCOME BACK, HUNTER</p>
+          <div className="flex items-center gap-3 flex-wrap">
+            <p className="font-accent text-xs tracking-[0.35em] text-[#D4AF37]/80">◆ WELCOME BACK, HUNTER</p>
+            {data.team && (
+              <span
+                data-testid="team-badge"
+                className={`font-accent text-[10px] tracking-[0.3em] px-3 py-1 rounded-full border ${
+                  data.team === "red"
+                    ? "border-red-500/50 text-red-300 bg-red-500/10"
+                    : "border-blue-400/50 text-blue-300 bg-blue-500/10"
+                }`}
+              >
+                TEAM {data.team.toUpperCase()}
+              </span>
+            )}
+          </div>
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl mt-2" data-testid="dashboard-welcome">
             {data.user.name?.split(" ")[0] || "Adventurer"}
           </h1>
@@ -187,3 +209,43 @@ function LevelCard({ lvl, index }) {
     </motion.button>
   );
 }
+
+function TeamPicker({ onPick }) {
+  return (
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-lg grid place-items-center p-4" data-testid="team-picker">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="glass rounded-2xl p-8 max-w-2xl w-full text-center"
+      >
+        <Shield className="text-[#D4AF37] mx-auto" size={36} />
+        <p className="font-accent text-xs tracking-[0.35em] text-[#D4AF37]/80 mt-4">◆ CHOOSE YOUR ALLEGIANCE ◆</p>
+        <h2 className="font-display text-3xl sm:text-4xl mt-3">Pick a Team</h2>
+        <p className="text-gray-400 mt-3 text-sm max-w-md mx-auto">
+          Every score and every chamber cleared adds to your team&apos;s standing. Choose wisely, hunter.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+          <button
+            onClick={() => onPick("red")}
+            data-testid="pick-team-red"
+            className="rounded-2xl p-6 border-2 border-red-500/40 bg-red-500/10 hover:bg-red-500/20 hover:border-red-400 transition-all text-left group"
+          >
+            <Shield className="text-red-400 group-hover:scale-110 transition-transform" size={28} />
+            <p className="font-display text-3xl mt-3 text-red-300">Team Red</p>
+            <p className="text-xs text-red-200/70 mt-2 font-accent tracking-widest">FLAMEKEEPERS</p>
+          </button>
+          <button
+            onClick={() => onPick("blue")}
+            data-testid="pick-team-blue"
+            className="rounded-2xl p-6 border-2 border-blue-400/40 bg-blue-500/10 hover:bg-blue-500/20 hover:border-blue-300 transition-all text-left group"
+          >
+            <Shield className="text-blue-300 group-hover:scale-110 transition-transform" size={28} />
+            <p className="font-display text-3xl mt-3 text-blue-200">Team Blue</p>
+            <p className="text-xs text-blue-200/70 mt-2 font-accent tracking-widest">TIDEWALKERS</p>
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+

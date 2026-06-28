@@ -68,7 +68,7 @@ function LevelsTab() {
     await api.put(`/admin/levels/${lvl.level_id}`, patch);
     load();
   };
-  const addQuestion = (lvl) => setEditing({ levelId: lvl.level_id, q: { type: "text", prompt: "", answer: "", options: [], order: lvl.questions?.length || 0 } });
+  const addQuestion = (lvl) => setEditing({ levelId: lvl.level_id, q: { type: "text", prompt: "", answer: "", options: [], order: lvl.questions?.length || 0, is_draft: true } });
   const editQuestion = (lvl, q) => setEditing({ levelId: lvl.level_id, q: { ...q } });
   const saveQuestion = async () => {
     const { levelId, q } = editing;
@@ -127,9 +127,14 @@ function LevelsTab() {
 
             <div className="mt-5 space-y-2">
               {(lvl.questions || []).sort((a, b) => a.order - b.order).map((q, i) => (
-                <div key={q.question_id} className="flex items-center gap-3 bg-black/30 rounded-lg px-4 py-3 border border-white/5">
+                <div key={q.question_id} className={`flex items-center gap-3 bg-black/30 rounded-lg px-4 py-3 border ${q.is_draft ? "border-yellow-500/30" : "border-white/5"}`}>
                   <span className="text-xs text-[#D4AF37] font-accent tracking-widest">#{i + 1}</span>
                   <span className="text-xs uppercase tracking-wider text-gray-400">{q.type}</span>
+                  {q.is_draft && (
+                    <span className="text-[10px] font-accent tracking-widest px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-300 border border-yellow-500/30" data-testid={`draft-badge-${lvl.number}-${i}`}>
+                      DRAFT
+                    </span>
+                  )}
                   <span className="text-sm text-gray-200 flex-1 truncate">{q.prompt}</span>
                   <button onClick={() => editQuestion(lvl, q)} className="text-xs text-[#D4AF37] hover:text-[#FDE047]" data-testid={`edit-q-${lvl.number}-${i}`}>Edit</button>
                   <button onClick={() => deleteQuestion(lvl, q)} className="text-red-400 hover:text-red-300"><Trash2 size={14} /></button>
@@ -188,6 +193,19 @@ function QuestionEditor({ editing, setEditing, saveQuestion }) {
         <input value={q.answer} onChange={(e) => set({ answer: e.target.value })} className="tt-input mt-1" data-testid="q-answer" />
         <label className="text-xs text-gray-400 uppercase tracking-wider mt-4 block">Order</label>
         <input type="number" value={q.order ?? 0} onChange={(e) => set({ order: parseInt(e.target.value, 10) || 0 })} className="tt-input mt-1" />
+        <label className="flex items-center gap-3 mt-5 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={!!q.is_draft}
+            onChange={(e) => set({ is_draft: e.target.checked })}
+            className="w-4 h-4 accent-[#D4AF37]"
+            data-testid="q-is-draft"
+          />
+          <span className="text-sm text-gray-200">
+            <span className="font-medium">Draft</span>
+            <span className="text-gray-500 ml-2 text-xs">— hidden from players until unchecked</span>
+          </span>
+        </label>
         <div className="flex gap-3 justify-end mt-6">
           <button onClick={() => setEditing(null)} className="btn-ghost">Cancel</button>
           <button onClick={saveQuestion} className="btn-gold flex items-center gap-2" data-testid="save-q-btn"><Save size={14} /> Save</button>
