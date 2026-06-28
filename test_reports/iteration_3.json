@@ -1,0 +1,22 @@
+{
+  "summary": "Regression test for 'hide riddle content from players' bug fix. Backend player endpoint /api/levels/1/question now returns only question_id+order (no prompt/options/image_url/type/answer). Admin endpoint /api/admin/levels still returns full content. Frontend LevelPlay shows 'Question 1' instead of riddle text, no option buttons render, full 3-question flow (echo→footsteps→piano) advances correctly and ends with 'Chamber Sealed' screen. Dashboard shows 'Level N' + 'Question 1/2/3' bullets with no riddle/title leaks.",
+  "tested_scope": ["backend", "frontend", "integration"],
+  "passed": [
+    "GET /api/levels/1/question (player) returns ONLY {question_id, order} in question field — no prompt/options/image_url/type/answer",
+    "GET /api/admin/levels (admin) still returns full prompt, answer, options, image_url, type",
+    "Dashboard renders 'Level 1' card with 'Question 1/2/3' bullet list",
+    "Dashboard contains no riddle prompt leaks ('I speak without a mouth', 'echo', 'piano', 'footsteps') and no level title leak ('The First Clue', 'Deeper into the Woods')",
+    "LevelPlay /level/1: data-testid='question-prompt' renders literal 'Question 1' string",
+    "LevelPlay body contains no riddle prompt text leaks",
+    "data-testid='answer-input' and data-testid='submit-answer-btn' present; zero data-testid='option-*' buttons rendered",
+    "Submitting 'echo' for Q1 advances to 'Question 2' (question-prompt updates correctly)",
+    "Submitting 'footsteps' for Q2 advances to 'Question 3'",
+    "Submitting 'piano' for Q3 shows 'Chamber Sealed' level-complete screen; old 'Conquered' text not present"
+  ],
+  "failed": [],
+  "action_items": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "retest_needed": false,
+  "full_testing_deferred": true,
+  "notes": "test-admin-1 was re-promoted to is_admin:true to verify admin endpoint; progress was reset before frontend flow. Wrong-answer transient toast (wind→TRY AGAIN) and success toast were not captured by selector but Q1→Q2→Q3 progression proves submit/answer-validation logic works end-to-end."
+}

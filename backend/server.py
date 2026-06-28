@@ -274,12 +274,10 @@ async def get_current_question(number: int, request: Request):
     if q_idx >= len(questions):
         return {"level_completed": True, "level": {"number": number, "title": lvl["title"], "subtitle": lvl.get("subtitle", "")}}
     q = questions[q_idx]
+    # Hidden mode: server returns only metadata, NEVER the prompt/options/image.
+    # Players solve riddles distributed offline and just submit answers here.
     safe_q = {
         "question_id": q["question_id"],
-        "type": q["type"],
-        "prompt": q["prompt"],
-        "image_url": q.get("image_url"),
-        "options": q.get("options", []),
         "order": q.get("order", 0),
     }
     return {

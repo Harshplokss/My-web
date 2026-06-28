@@ -144,44 +144,26 @@ export default function LevelPlay() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="glass rounded-2xl p-7 sm:p-10 mt-8 relative overflow-hidden"
+          className="glass rounded-2xl p-7 sm:p-10 mt-8 relative overflow-hidden text-center"
         >
-          <span className="font-accent text-[11px] tracking-[0.3em] text-[#D4AF37]/80 uppercase">{q.type.replace("_", " ")}</span>
-          <p className="font-display text-2xl sm:text-3xl mt-4 leading-snug" data-testid="question-prompt">{q.prompt}</p>
+          <span className="font-accent text-[11px] tracking-[0.3em] text-[#D4AF37]/80 uppercase">Hidden Riddle</span>
+          <p className="font-display text-4xl sm:text-5xl mt-4 leading-snug" data-testid="question-prompt">
+            Question {idx + 1}
+          </p>
+          <p className="text-sm text-gray-400 mt-3 max-w-md mx-auto">
+            Refer to the riddle you were given. Enter your answer below.
+          </p>
 
-          {q.image_url && (
-            <img src={q.image_url} alt="" className="mt-6 rounded-xl border border-white/10 max-h-72 mx-auto" />
-          )}
-
-          <div className="mt-7">
-            {q.type === "multiple_choice" && q.options?.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {q.options.map((opt, i) => (
-                  <button
-                    key={i}
-                    onClick={() => { setAnswer(opt); }}
-                    className={`text-left px-4 py-3.5 rounded-xl border transition-all font-body ${
-                      answer === opt
-                        ? "border-[#D4AF37] bg-[#D4AF37]/10 text-white"
-                        : "border-white/10 bg-black/30 text-gray-200 hover:border-[#D4AF37]/40"
-                    }`}
-                    data-testid={`option-${i}`}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <input
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && submit()}
-                placeholder="Type your answer…"
-                className="tt-input text-lg"
-                data-testid="answer-input"
-                autoFocus
-              />
-            )}
+          <div className="mt-7 max-w-md mx-auto">
+            <input
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && submit()}
+              placeholder="Type your answer…"
+              className="tt-input text-lg text-center"
+              data-testid="answer-input"
+              autoFocus
+            />
           </div>
 
           <AnimatePresence>
@@ -190,7 +172,7 @@ export default function LevelPlay() {
                 initial={{ opacity: 0, scale: 0.7 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                className="mt-6 flex items-center gap-3 text-emerald-400"
+                className="mt-6 flex items-center justify-center gap-3 text-emerald-400"
                 data-testid="success-msg"
               >
                 <CheckCircle2 size={20} /> <span className="font-accent tracking-widest text-sm">CORRECT!</span>
@@ -201,7 +183,7 @@ export default function LevelPlay() {
                 initial={{ x: -8 }}
                 animate={{ x: [8, -8, 6, -6, 0] }}
                 transition={{ duration: 0.4 }}
-                className="mt-6 flex items-center gap-3 text-red-400"
+                className="mt-6 flex items-center justify-center gap-3 text-red-400"
                 data-testid="wrong-msg"
               >
                 <XCircle size={20} /> <span className="font-accent tracking-widest text-sm">TRY AGAIN</span>
@@ -209,7 +191,7 @@ export default function LevelPlay() {
             )}
           </AnimatePresence>
 
-          <div className="mt-8 flex items-center justify-end">
+          <div className="mt-8 flex items-center justify-center">
             <button
               onClick={submit}
               disabled={!answer.trim() || submitting || state === "correct"}
