@@ -7,7 +7,7 @@ const HERO_BG = "https://images.unsplash.com/photo-1544039161-b0c20826c6f6?crop=
 export default function Landing() {
   const handleSignIn = () => {
     // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
-    const redirectUrl = window.location.origin + "/dashboard";
+    const redirectUrl = window.location.origin + "/auth/callback";
     window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
   };
 
