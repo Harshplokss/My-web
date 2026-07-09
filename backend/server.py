@@ -124,8 +124,18 @@ async def get_or_create_progress(user_id: str) -> dict:
     return p
 
 def visible_questions(lvl: dict) -> list:
-    """TEMP: Show all questions"""
-    return sorted(lvl.get("questions", []), key=lambda q: q.get("order", 0))
+    qs = []
+    for q in lvl.get("questions", []):
+        draft = q.get("is_draft", False)
+
+        # Handle both boolean and string values
+        if isinstance(draft, str):
+            draft = draft.lower() == "true"
+
+        if not draft:
+            qs.append(q)
+
+    return sorted(qs, key=lambda q: q.get("order", 0))
 
 # ===== Auth =====
 @api.post("/auth/session")
