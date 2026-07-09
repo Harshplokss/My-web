@@ -124,9 +124,8 @@ async def get_or_create_progress(user_id: str) -> dict:
     return p
 
 def visible_questions(lvl: dict) -> list:
-    """Player-facing question list — hides drafts, preserves order."""
-    qs = [q for q in lvl.get("questions", []) if not q.get("is_draft")]
-    return sorted(qs, key=lambda q: q.get("order", 0))
+    """TEMP: Show all questions"""
+    return sorted(lvl.get("questions", []), key=lambda q: q.get("order", 0))
 
 # ===== Auth =====
 @api.post("/auth/session")
