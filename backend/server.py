@@ -134,7 +134,8 @@ def visible_questions(lvl: dict) -> list:
 
         if not draft:
             qs.append(q)
-
+            
+    print(lvl.get("questions", []))
     return sorted(qs, key=lambda q: q.get("order", 0))
 
 # ===== Auth =====
