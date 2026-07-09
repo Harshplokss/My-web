@@ -509,7 +509,7 @@ async def admin_add_question(level_id: str, request: Request):
         options=body.get("options", []),
         answer=body["answer"],
         order=int(body.get("order", len(lvl.get("questions", [])))),
-        is_draft=bool(body.get("is_draft", False)),
+        is_draft=False,
     )
     await db.levels.update_one({"level_id": level_id}, {"$push": {"questions": q.model_dump()}})
     return q.model_dump()
