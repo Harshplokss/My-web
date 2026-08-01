@@ -2,70 +2,78 @@ import { motion } from "framer-motion";
 
 import luffy from "../../assets/images/hero-luffy.png";
 import sunny from "../../assets/images/thousand-sunny.png";
-import ocean from "../../assets/images/ocean-bg.jpg";
+import ocean from "../../assets/images/ocean.png";
 
 export default function Hero() {
   return (
     <section
-      className="relative h-screen flex items-center justify-center overflow-hidden"
+      className="relative h-screen overflow-hidden flex items-center justify-center"
       style={{
         backgroundImage: `url(${ocean})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
     >
+      {/* Dark Overlay */}
       <div className="absolute inset-0 bg-black/50" />
 
+      {/* Thousand Sunny */}
       <motion.img
         src={sunny}
-        alt="Sunny"
-        className="absolute bottom-12 left-0 w-72"
+        alt="Thousand Sunny"
+        className="absolute bottom-10 left-[-250px] w-64 md:w-80"
         animate={{
-          x: ["-15%", "110%"],
-          y: [0, -12, 0],
+          x: ["0%", "160%"],
+          y: [0, -8, 0],
         }}
         transition={{
-          duration: 25,
+          duration: 20,
           repeat: Infinity,
           ease: "linear",
         }}
       />
 
-      <motion.div
-        initial={{ opacity: 0, y: 60 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1 }}
-        className="relative z-10 text-center"
-      >
+      {/* Hero Content */}
+      <div className="relative z-10 text-center px-6">
         <motion.img
           src={luffy}
-          alt="Luffy"
-          className="w-[420px] mx-auto drop-shadow-2xl"
-          animate={{ y: [0, -15, 0] }}
+          alt="Monkey D. Luffy"
+          className="w-72 md:w-[450px] mx-auto drop-shadow-2xl"
+          animate={{ y: [0, -12, 0] }}
           transition={{
             repeat: Infinity,
-            duration: 4,
+            duration: 3,
           }}
         />
 
-        <h1 className="text-7xl font-black mt-8 tracking-wide">
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          className="mt-8 text-5xl md:text-7xl font-extrabold text-white"
+        >
           SET SAIL
-        </h1>
+        </motion.h1>
 
-        <p className="text-yellow-400 text-2xl mt-3">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="text-yellow-400 text-xl md:text-2xl mt-3"
+        >
           The Grand Line Awaits
-        </p>
+        </motion.p>
 
-        <div className="flex justify-center gap-6 mt-10">
-          <button className="btn-gold text-lg px-8 py-4">
+        <div className="flex flex-col md:flex-row gap-4 justify-center mt-10">
+          <button className="px-8 py-4 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-black font-bold transition">
             Begin Journey
           </button>
 
-          <button className="btn-ghost text-lg px-8 py-4">
-            Continue
+          <button className="px-8 py-4 rounded-xl border border-white hover:bg-white hover:text-black transition">
+            Continue Adventure
           </button>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }
