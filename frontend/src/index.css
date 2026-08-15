@@ -1,0 +1,733 @@
+@import url('https://fonts.googleapis.com/css2?family=Pirata+One&family=Cinzel:wght@400;500;600;700&family=Cabin:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   ONE PIECE GRAND LINE — DESIGN SYSTEM
+   ============================================================ */
+
+:root {
+  /* Core Ocean Palette */
+  --ocean-deepest: #040D1A;
+  --ocean-deep: #071525;
+  --ocean-mid: #0A1E35;
+  --ocean-surface: #0D2847;
+  --ocean-light: #1A4A7A;
+  --ocean-foam: #4A90D9;
+  
+  /* Gold Doubloon */
+  --doubloon: #D4AF37;
+  --doubloon-bright: #F5D05C;
+  --doubloon-shine: #FFE87A;
+  --doubloon-dark: #A0780A;
+  
+  /* Ship & Wood */
+  --ship-red: #C0392B;
+  --ship-brown: #6B3A2A;
+  --wood: #8B5E3C;
+  --wood-light: #A67C52;
+  
+  /* Parchment */
+  --parchment: #F5E6C8;
+  --parchment-dark: #C4A46B;
+  --parchment-light: #FDF5E4;
+  
+  /* Navy / Marine */
+  --navy: #1A237E;
+  
+  /* UI */
+  --radius: 0.7rem;
+  --radius-lg: 1rem;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ocean-deepest);
+  color: #F3F4F6;
+  font-family: 'Cabin', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection { background: var(--doubloon); color: #000; }
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+.font-pirate  { font-family: 'Pirata One', 'Cinzel', serif; letter-spacing: 0.04em; }
+.font-display { font-family: 'Cinzel', serif; letter-spacing: -0.01em; }
+.font-accent  { font-family: 'Cinzel', serif; letter-spacing: 0.08em; }
+.font-body    { font-family: 'Cabin', sans-serif; }
+
+/* ============================================================
+   OCEAN ANIMATED BACKGROUND
+   ============================================================ */
+.ocean-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    #040D1A 0%,
+    #071525 20%,
+    #0A1E35 45%,
+    #0D2847 70%,
+    #0a3055 100%
+  );
+}
+
+.ocean-stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 15%, rgba(255,255,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 8%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 5%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 90% 12%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 10% 25%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 75% 30%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 50% 18%, rgba(212,175,55,0.6) 0%, transparent 100%);
+}
+
+.ocean-moon {
+  position: absolute;
+  top: 8%;
+  right: 12%;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #FFFFF0, #E8D87A);
+  box-shadow: 0 0 30px rgba(255,255,200,0.4), 0 0 80px rgba(255,255,200,0.15);
+}
+
+/* Wave layers */
+.wave-layer {
+  position: absolute;
+  bottom: 0;
+  left: -50%;
+  width: 200%;
+  pointer-events: none;
+}
+.wave-layer-1 {
+  bottom: 0;
+  opacity: 0.5;
+  animation: wave 12s linear infinite;
+}
+.wave-layer-2 {
+  bottom: 20px;
+  opacity: 0.3;
+  animation: wave2 8s linear infinite;
+}
+.wave-layer-3 {
+  bottom: 40px;
+  opacity: 0.2;
+  animation: wave 16s linear infinite reverse;
+}
+
+@keyframes wave {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-25%); }
+}
+@keyframes wave2 {
+  0%, 100% { transform: translateX(-25%); }
+  50% { transform: translateX(0); }
+}
+
+/* Ship silhouette */
+.pirate-ship {
+  position: absolute;
+  bottom: 120px;
+  animation: ship-sail 6s ease-in-out infinite;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6));
+}
+
+@keyframes ship-sail {
+  0%   { transform: translateX(0) rotate(-1deg); }
+  25%  { transform: translateX(8px) rotate(0.5deg); }
+  50%  { transform: translateX(14px) rotate(1deg); }
+  75%  { transform: translateX(6px) rotate(0deg); }
+  100% { transform: translateX(0) rotate(-1deg); }
+}
+
+/* Cloud animation */
+@keyframes cloud-drift {
+  0%   { transform: translateX(-200px); opacity: 0; }
+  5%   { opacity: 0.6; }
+  95%  { opacity: 0.6; }
+  100% { transform: translateX(110vw); opacity: 0; }
+}
+
+/* Fog */
+@keyframes fog-drift {
+  0%, 100% { opacity: 0.4; transform: translateX(0) scaleX(1); }
+  50%       { opacity: 0.7; transform: translateX(-30px) scaleX(1.05); }
+}
+
+/* ============================================================
+   GLASS / PARCHMENT CARDS
+   ============================================================ */
+.glass {
+  background: rgba(10, 30, 53, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(74, 144, 217, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+.glass-hover:hover {
+  border-color: rgba(212, 175, 55, 0.5);
+  box-shadow: 0 0 0 1px rgba(212,175,55,0.2), 0 12px 40px rgba(0,0,0,0.6);
+}
+.glass-dark {
+  background: rgba(4, 13, 26, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(74, 144, 217, 0.15);
+}
+
+/* Parchment card - aged paper look */
+.parchment-card {
+  background: linear-gradient(135deg, #F5E6C8 0%, #EDD9A3 40%, #E8CF8A 70%, #DFC47A 100%);
+  color: #2C1810;
+  border: 3px solid #8B5E3C;
+  box-shadow:
+    inset 0 0 60px rgba(139, 94, 60, 0.15),
+    0 8px 32px rgba(0,0,0,0.5),
+    4px 4px 0 rgba(0,0,0,0.2);
+  position: relative;
+}
+.parchment-card::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px dashed rgba(139, 94, 60, 0.4);
+  pointer-events: none;
+  border-radius: 0.4rem;
+}
+
+/* WANTED poster style */
+.wanted-poster {
+  background: linear-gradient(160deg, #F0DBA0 0%, #E8CF82 50%, #DFC070 100%);
+  border: 4px solid #5C3A1E;
+  box-shadow:
+    inset 0 0 40px rgba(92,58,30,0.2),
+    0 10px 40px rgba(0,0,0,0.6),
+    5px 5px 0 rgba(0,0,0,0.3);
+  color: #2C1810;
+  position: relative;
+}
+.wanted-poster::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Rope border */
+.rope-border {
+  border: 4px solid transparent;
+  border-image: repeating-linear-gradient(
+    45deg,
+    #8B5E3C 0px,
+    #8B5E3C 8px,
+    #6B3A2A 8px,
+    #6B3A2A 16px
+  ) 4;
+}
+
+/* Wood panel */
+.wood-panel {
+  background: linear-gradient(
+    180deg,
+    #6B3A2A 0%,
+    #8B5E3C 20%,
+    #7A4B30 40%,
+    #8B5E3C 60%,
+    #6B3A2A 80%,
+    #5C3020 100%
+  );
+  border-top: 3px solid #A67C52;
+  border-bottom: 3px solid #4A2010;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn-gold {
+  background: linear-gradient(180deg, #F5D05C 0%, #D4AF37 50%, #A0780A 100%);
+  color: #1A0A00;
+  font-weight: 700;
+  padding: 0.75rem 1.75rem;
+  border-radius: 0.6rem;
+  border: 2px solid #A0780A;
+  box-shadow:
+    0 0 20px rgba(212,175,55,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    inset 0 -2px 0 rgba(0,0,0,0.2);
+  transition: all 0.25s ease;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.btn-gold:hover {
+  background: linear-gradient(180deg, #FFE87A 0%, #F5D05C 50%, #D4AF37 100%);
+  box-shadow: 0 0 35px rgba(212,175,55,0.8), inset 0 1px 0 rgba(255,255,255,0.4);
+  transform: translateY(-2px);
+}
+.btn-gold:active { transform: translateY(0); }
+.btn-gold:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.btn-ship-red {
+  background: linear-gradient(180deg, #E74C3C 0%, #C0392B 100%);
+  color: #fff;
+  font-weight: 700;
+  padding: 0.75rem 1.75rem;
+  border-radius: 0.6rem;
+  border: 2px solid #922B21;
+  box-shadow: 0 0 15px rgba(192,57,43,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: all 0.25s ease;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.btn-ship-red:hover {
+  background: linear-gradient(180deg, #FF6347 0%, #E74C3C 100%);
+  box-shadow: 0 0 25px rgba(192,57,43,0.6);
+  transform: translateY(-2px);
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 2px solid rgba(212, 175, 55, 0.5);
+  color: #D4AF37;
+  padding: 0.65rem 1.5rem;
+  border-radius: 0.6rem;
+  transition: all 0.25s ease;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.btn-ghost:hover {
+  background: rgba(212, 175, 55, 0.12);
+  border-color: #D4AF37;
+  box-shadow: 0 0 15px rgba(212,175,55,0.3);
+}
+
+.btn-navy {
+  background: linear-gradient(180deg, #283593 0%, #1A237E 100%);
+  color: #fff;
+  font-weight: 700;
+  padding: 0.75rem 1.75rem;
+  border-radius: 0.6rem;
+  border: 2px solid #0D1854;
+  transition: all 0.25s ease;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.btn-navy:hover { background: linear-gradient(180deg, #3949AB 0%, #283593 100%); transform: translateY(-2px); }
+
+/* ============================================================
+   INPUTS
+   ============================================================ */
+.tt-input {
+  background: rgba(4, 13, 26, 0.8);
+  border: 2px solid rgba(74, 144, 217, 0.25);
+  color: #F3F4F6;
+  border-radius: 0.6rem;
+  padding: 0.85rem 1.1rem;
+  width: 100%;
+  font-family: 'Cabin', sans-serif;
+  font-size: 1rem;
+  transition: all 0.25s ease;
+}
+.tt-input::placeholder { color: rgba(74, 144, 217, 0.4); }
+.tt-input:focus {
+  outline: none;
+  border-color: rgba(212, 175, 55, 0.7);
+  box-shadow: 0 0 0 3px rgba(212,175,55,0.15), 0 0 20px rgba(212,175,55,0.1);
+  background: rgba(4, 13, 26, 0.95);
+}
+
+/* Parchment input (for question screens) */
+.parchment-input {
+  background: rgba(245, 230, 200, 0.9);
+  border: 2px solid #8B5E3C;
+  color: #2C1810;
+  border-radius: 0.4rem;
+  padding: 0.85rem 1.1rem;
+  width: 100%;
+  font-family: 'Cabin', sans-serif;
+  font-size: 1rem;
+  transition: all 0.25s ease;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+.parchment-input::placeholder { color: rgba(92, 58, 30, 0.5); }
+.parchment-input:focus {
+  outline: none;
+  border-color: #D4AF37;
+  box-shadow: 0 0 0 3px rgba(212,175,55,0.3);
+}
+
+/* ============================================================
+   PROGRESS BARS
+   ============================================================ */
+.tt-progress {
+  height: 12px;
+  background: rgba(4, 13, 26, 0.8);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(74, 144, 217, 0.2);
+}
+.tt-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1A4A7A 0%, #D4AF37 60%, #FFE87A 100%);
+  box-shadow: 0 0 12px rgba(212,175,55,0.6);
+  transition: width 0.7s ease;
+  border-radius: 999px;
+  position: relative;
+}
+.tt-progress-fill::after {
+  content: '⛵';
+  position: absolute;
+  right: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  filter: drop-shadow(0 0 6px rgba(212,175,55,0.8));
+}
+
+/* Bounty progress */
+.bounty-progress {
+  height: 8px;
+  background: rgba(92, 58, 30, 0.4);
+  border-radius: 999px;
+  overflow: visible;
+  border: 1px solid rgba(139, 94, 60, 0.4);
+}
+.bounty-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #D4AF37, #F5D05C);
+  box-shadow: 0 0 8px rgba(212,175,55,0.5);
+  border-radius: 999px;
+  transition: width 1s ease;
+}
+
+/* ============================================================
+   GRAND LINE MAP
+   ============================================================ */
+.grand-line-track {
+  position: relative;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(74, 144, 217, 0.2) 20%,
+    rgba(212, 175, 55, 0.3) 50%,
+    rgba(74, 144, 217, 0.2) 80%,
+    transparent 100%
+  );
+  border-top: 2px dashed rgba(212, 175, 55, 0.4);
+  border-bottom: 2px dashed rgba(212, 175, 55, 0.4);
+}
+
+.island-node {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.island-node:hover .island-circle { transform: scale(1.1); }
+
+.island-circle {
+  transition: transform 0.3s ease;
+}
+.island-active .island-circle {
+  animation: float-island 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 15px rgba(212,175,55,0.6));
+}
+
+@keyframes float-island {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+/* ============================================================
+   ISLAND / ARC CARDS
+   ============================================================ */
+.arc-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
+}
+.arc-card:hover {
+  transform: translateY(-6px) scale(1.02);
+}
+.arc-card-locked {
+  filter: grayscale(0.8) brightness(0.4);
+  cursor: not-allowed;
+}
+.arc-card-locked:hover { transform: none; }
+
+/* Chest glow */
+@keyframes chest-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(212,175,55,0.4), 0 0 60px rgba(212,175,55,0.1); }
+  50%       { box-shadow: 0 0 40px rgba(212,175,55,0.9), 0 0 100px rgba(212,175,55,0.4); }
+}
+.chest-glow { animation: chest-glow 2s ease-in-out infinite; }
+
+/* ============================================================
+   PARTICLES - Ocean / Gold dust
+   ============================================================ */
+.particles {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+}
+.particles .mote {
+  position: absolute;
+  border-radius: 50%;
+  animation: mote-float linear infinite;
+  opacity: 0.7;
+}
+@keyframes mote-float {
+  0%   { transform: translateY(110vh) translateX(0) rotate(0deg); opacity: 0; }
+  10%  { opacity: 0.8; }
+  90%  { opacity: 0.5; }
+  100% { transform: translateY(-10vh) translateX(30px) rotate(360deg); opacity: 0; }
+}
+
+/* ============================================================
+   COMBO STREAK
+   ============================================================ */
+.combo-badge {
+  background: linear-gradient(135deg, #FF6B35, #FF4500);
+  color: #fff;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  border: 2px solid #FF4500;
+  box-shadow: 0 0 15px rgba(255,107,53,0.6), 0 0 30px rgba(255,107,53,0.3);
+  animation: combo-pulse 0.5s ease-out;
+}
+@keyframes combo-pulse {
+  0%   { transform: scale(1.3); }
+  60%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+/* ============================================================
+   PIRATE RANK BADGE
+   ============================================================ */
+.rank-badge {
+  background: linear-gradient(135deg, #D4AF37, #F5D05C, #D4AF37);
+  background-size: 200% auto;
+  color: #1A0A00;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  animation: rank-shine 3s linear infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+@keyframes rank-shine {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ============================================================
+   CERTIFICATE / CELEBRATION
+   ============================================================ */
+.certificate {
+  background:
+    linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(139,94,60,0.08) 100%),
+    #0A1E35;
+  border: 4px double #D4AF37;
+  position: relative;
+  box-shadow: inset 0 0 80px rgba(212,175,55,0.15), 0 30px 80px rgba(0,0,0,0.7);
+}
+.certificate::before {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border: 1px solid rgba(212,175,55,0.4);
+  pointer-events: none;
+  border-radius: 0.4rem;
+}
+
+/* Treasure chest container */
+.treasure-chest-wrapper {
+  perspective: 800px;
+}
+.chest-lid {
+  transform-origin: center bottom;
+  transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.chest-lid.open {
+  transform: rotateX(-130deg);
+}
+.chest-glow-burst {
+  animation: burst-expand 0.8s ease-out forwards;
+}
+@keyframes burst-expand {
+  0%   { transform: scale(0); opacity: 1; }
+  100% { transform: scale(4); opacity: 0; }
+}
+
+/* ============================================================
+   VIGNETTE
+   ============================================================ */
+.vignette::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(4, 13, 26, 0.5) 100%);
+}
+
+/* Gold glow ring */
+.gold-ring { box-shadow: 0 0 0 2px rgba(212,175,55,0.3), 0 0 30px rgba(212,175,55,0.2); }
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--ocean-deepest); }
+::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(212,175,55,0.6); }
+
+/* ============================================================
+   MCQ OPTION BUTTONS
+   ============================================================ */
+.mcq-option {
+  background: rgba(10, 30, 53, 0.8);
+  border: 2px solid rgba(74, 144, 217, 0.3);
+  color: #F3F4F6;
+  padding: 0.85rem 1.25rem;
+  border-radius: 0.6rem;
+  text-align: left;
+  width: 100%;
+  font-family: 'Cabin', sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.mcq-option:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: rgba(212, 175, 55, 0.5);
+  box-shadow: 0 0 15px rgba(212,175,55,0.2);
+  transform: translateX(4px);
+}
+.mcq-option.selected {
+  background: rgba(212, 175, 55, 0.2);
+  border-color: #D4AF37;
+  box-shadow: 0 0 20px rgba(212,175,55,0.3);
+}
+.mcq-option.correct {
+  background: rgba(5, 150, 105, 0.3);
+  border-color: #10B981;
+  box-shadow: 0 0 20px rgba(16,185,129,0.3);
+}
+.mcq-option.wrong {
+  background: rgba(220, 38, 38, 0.2);
+  border-color: #EF4444;
+  animation: shake 0.4s ease-out;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-5px); }
+  80%       { transform: translateX(5px); }
+}
+
+/* ============================================================
+   SHADCN dark vars
+   ============================================================ */
+@layer base {
+  :root {
+    --background: 209 60% 6%;
+    --foreground: 210 20% 96%;
+    --card: 209 55% 8%;
+    --card-foreground: 210 20% 96%;
+    --popover: 209 55% 8%;
+    --popover-foreground: 210 20% 96%;
+    --primary: 45 65% 52%;
+    --primary-foreground: 209 60% 6%;
+    --secondary: 209 40% 14%;
+    --secondary-foreground: 210 20% 96%;
+    --muted: 209 35% 18%;
+    --muted-foreground: 220 10% 65%;
+    --accent: 209 40% 14%;
+    --accent-foreground: 210 20% 96%;
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 209 25% 18%;
+    --input: 209 25% 18%;
+    --ring: 45 65% 52%;
+    --radius: 0.7rem;
+  }
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground; }
+}
+
+/* Coin pop animation */
+@keyframes coin-pop {
+  0%   { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+  50%  { transform: translateY(-50px) scale(1.2) rotate(180deg); opacity: 1; }
+  100% { transform: translateY(-90px) scale(0.5) rotate(360deg); opacity: 0; }
+}
+.coin-pop { animation: coin-pop 0.9s ease-out forwards; }
+
+/* Compass spin */
+@keyframes compass-spin {
+  0%   { transform: rotate(0deg); }
+  25%  { transform: rotate(20deg); }
+  75%  { transform: rotate(-15deg); }
+  100% { transform: rotate(0deg); }
+}
+.compass-spin { animation: compass-spin 3s ease-in-out infinite; }
+
+/* firework */
+.firework {
+  position: absolute;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+@keyframes burst {
+  0%   { transform: translate(0,0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+}
+
+/* Timer ring */
+.timer-ring { transition: stroke-dashoffset 1s linear; }
+.timer-critical { animation: timer-pulse 0.5s ease-in-out infinite; }
+@keyframes timer-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* Locked card */
+.locked-card { filter: grayscale(0.8) brightness(0.4); cursor: not-allowed; }
+
+/* Hide scrollbar on particles */
+.particles::-webkit-scrollbar { display: none; }
+
+/* Jolly Roger spin */
+@keyframes jolly-spin {
+  0%   { transform: rotate(-5deg); }
+  50%  { transform: rotate(5deg); }
+  100% { transform: rotate(-5deg); }
+}
+.jolly-spin { animation: jolly-spin 4s ease-in-out infinite; }

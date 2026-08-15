@@ -1,0 +1,23 @@
+{
+  "summary": "Frontend UI testing of Treasure Hunt app completed. All 9 requested flows verified end-to-end via Playwright with injected test admin session. Landing, dashboard, level play (correct/wrong answers + advance), locked-level handling, forbidden path, leaderboard, admin tabs (levels/users/final), logout, and mobile responsiveness all working. No frontend blockers found.",
+  "tested_scope": ["frontend", "integration"],
+  "passed": [
+    "Landing renders 'Five trials' title, landing-signin-cta and landing-signin-top visible",
+    "CTA click navigates to auth.emergentagent.com/?redirect=...",
+    "Dashboard via injected cookie shows welcome 'Admin', all 4 stat cards, progress-bar, and level-card-1..5",
+    "Level 1 question-prompt + answer-input render; wrong answer 'wind' triggers wrong-msg (TRY AGAIN)",
+    "Correct answer 'echo' triggers success-msg (CORRECT!) and advances to next question (Riddle 2/3)",
+    "/level/3 (locked) shows 'Forbidden Path' page",
+    "level-card-2 is not clickable from dashboard (locked) — URL stays on /dashboard",
+    "nav-leaderboard navigates to /leaderboard and renders content",
+    "nav-admin: admin-tab-levels active by default, admin-level-1..5 all present; admin-tab-users renders user table; admin-tab-final shows final-answer-input and secret-message-input",
+    "nav-logout clears session and returns to landing (Five trials visible)",
+    "Mobile 375x800: no horizontal overflow on landing or dashboard"
+  ],
+  "failed": [],
+  "action_items": [],
+  "success_rate": {"backend": "n/a (skipped per request)", "frontend": "100%"},
+  "retest_needed": false,
+  "full_testing_deferred": true,
+  "notes": "Test session 'test_session_admin_1' was invalidated by the nav-logout test (server-side session delete). Re-seeded users/user_sessions/progress collections in MongoDB test_database and reran. Admin reset endpoint requires cookie/Bearer; works via in-page fetch with credentials:include. Wrong-msg auto-resets to idle after ~1200ms — use short wait window when asserting."
+}

@@ -1,0 +1,123 @@
+{
+  "theme": "Dark",
+  "archetype": "5 (Luxury / Cinematic Mystery)",
+  "typography": {
+    "headings": {
+      "fontFamily": "Cormorant Garamond, serif",
+      "weights": ["400", "700"],
+      "usage": "H1, H2, Level Titles. Tracking tight for larger text to maintain a cinematic feel."
+    },
+    "body": {
+      "fontFamily": "Outfit, sans-serif",
+      "weights": ["300", "400", "600"],
+      "usage": "Paragraphs, labels, smaller UI elements for modern readability."
+    },
+    "accent": {
+      "fontFamily": "Cinzel, serif",
+      "usage": "Badges, specific mysterious clues, final certificate text."
+    },
+    "scale": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tight leading-none",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl tracking-tight",
+      "h3": "text-xl sm:text-2xl",
+      "body": "text-base leading-relaxed text-gray-300",
+      "small": "text-sm uppercase tracking-[0.2em] text-gold-400"
+    }
+  },
+  "colors": {
+    "background": {
+      "base": "#0A0C10",
+      "surface": "#12151C",
+      "glass": "rgba(255, 255, 255, 0.03)"
+    },
+    "text": {
+      "primary": "#F3F4F6",
+      "secondary": "#9CA3AF",
+      "muted": "#4B5563"
+    },
+    "brand": {
+      "primary": "#D4AF37",
+      "primary_hover": "#FDE047",
+      "primary_glow": "rgba(212, 175, 55, 0.3)",
+      "copper": "#B87333",
+      "emerald": "#047857",
+      "locked": "#1F2937"
+    }
+  },
+  "spacing_and_layout": {
+    "philosophy": "Generous Spacing, Optical Alignment, Mobile-first",
+    "padding": "Containers with border must have padding (p-6 or p-8) to avoid text collision.",
+    "grids": "Use 'Control Room' grid for admin dashboards (gap-4/6), 'Tetris' grid for level selection (gap-8).",
+    "radius": "rounded-2xl for main cards, rounded-xl for inner elements. Nested radii rule."
+  },
+  "components": {
+    "cards": {
+      "style": "Glassmorphism: bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]. Add a subtle dark hover state with gold inner border glow for unlocked levels."
+    },
+    "buttons": {
+      "primary": "bg-[#D4AF37] text-black font-semibold rounded-lg hover:bg-[#FDE047] transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.4)] hover:shadow-[0_0_25px_rgba(212,175,55,0.6)]",
+      "secondary": "bg-transparent border-2 border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 rounded-lg transition-all",
+      "locked": "bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700 shadow-none"
+    },
+    "inputs": {
+      "style": "bg-black/50 border border-white/10 text-white rounded-lg focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent placeholder-gray-500 p-4 w-full"
+    },
+    "progressBar": {
+      "container": "h-3 bg-gray-900 rounded-full overflow-hidden border border-white/5",
+      "fill": "bg-gradient-to-r from-[#B87333] to-[#D4AF37] h-full shadow-[0_0_10px_rgba(212,175,55,0.5)] transition-all duration-500 ease-out"
+    }
+  },
+  "visual_enhancers": {
+    "background_effects": "Implement floating particles using 'react-tsparticles' for glowing dust motes / embers to give a cinematic treasure feel. Setup a dark radial gradient overlay to focus attention on center.",
+    "animations": "Use framer-motion for page transitions (fade-in, slide-up). Cards should have subtle scale on hover.",
+    "celebration": "Use 'react-confetti' for Level 5 success. Pass custom colors array matching gold/copper.",
+    "icons": "Use 'lucide-react' for all standard UI icons.",
+    "certificate": "Use a heavy border with 'Cormorant Garamond' and 'Cinzel' to mimic an ancient scroll or royal certificate."
+  },
+  "media": {
+    "images": [
+      {
+        "category": "hero_background",
+        "url": "https://images.unsplash.com/photo-1544039161-b0c20826c6f6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzZ8MHwxfHNlYXJjaHwyfHxtaXN0eSUyMGRhcmslMjBmb3Jlc3R8ZW58MHx8fHwxNzgyNTY2NzExfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Misty dark forest pathway used for landing page and overall atmospheric background. MUST apply heavy black overlay (bg-black/60) to maintain text contrast."
+      },
+      {
+        "category": "level_1_woods",
+        "url": "https://images.pexels.com/photos/11336947/pexels-photo-11336947.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Level 1 & 2 Background - Deep Woods / Forest."
+      },
+      {
+        "category": "level_3_cave",
+        "url": "https://images.unsplash.com/photo-1513733582371-0adb4dac50f6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2OTF8MHwxfHNlYXJjaHwxfHxhbmNpZW50JTIwdGVtcGxlJTIwcnVpbnN8ZW58MHx8fHwxNzgyNTY2NzExfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Level 3 Background - The Hidden Cave / Ruins."
+      },
+      {
+        "category": "level_4_temple",
+        "url": "https://images.unsplash.com/photo-1600023062179-6c6b954698cd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2OTF8MHwxfHNlYXJjaHwzfHxhbmNpZW50JTIwdGVtcGxlJTIwcnVpbnN8ZW58MHx8fHwxNzgyNTY2NzExfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Level 4 Background - The Forgotten Temple."
+      },
+      {
+        "category": "level_5_chamber",
+        "url": "https://images.pexels.com/photos/366791/pexels-photo-366791.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Level 5 Final Chamber & Treasure Chest for celebration and certificate background."
+      }
+    ]
+  },
+  "testing_attributes": {
+    "rule": "All interactive and key informational elements MUST include a data-testid attribute.",
+    "convention": "kebab-case, role-based",
+    "examples": ["login-button", "level-card-1", "answer-input", "submit-answer-button", "download-certificate-button", "player-dashboard-score"]
+  },
+  "instructions_to_main_agent": [
+    "REMEMBER: The project uses .js files, NOT .tsx. Generate standard React .js or .jsx files.",
+    "Use standard Tailwind CSS classes. Extend tailwind.config.js with primary gold (#D4AF37), obsidian background (#0A0C10), and custom fonts.",
+    "Ensure 'Cormorant Garamond', 'Outfit', and 'Cinzel' are imported in index.css from Google Fonts.",
+    "Install and use 'react-tsparticles' and 'tsparticles' for the floating dust/particles effect. The background should be purely black/dark transparent to overlay on the images.",
+    "Use 'framer-motion' for all component enter animations (fade up for cards, staggered lists).",
+    "Use 'lucide-react' for all icons.",
+    "For the celebration, install 'react-confetti'.",
+    "To generate and download the certificate, use 'html2canvas' and 'jspdf'.",
+    "Ensure all backgrounds use overlays (e.g. bg-black/60 or bg-black/70) to maintain text contrast (WCAG AA). Text contrast against background images is CRITICAL.",
+    "For Shadcn components, strip the default light borders and use border-white/10 to fit the glassmorphism dark theme."
+  ]
+}
