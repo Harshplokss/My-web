@@ -6,6 +6,7 @@ export const API = BACKEND.endsWith('/api') ? BACKEND : `${BACKEND}/api`;
 export const api = axios.create({
   baseURL: API,
   withCredentials: true,
+  timeout: 10000,
 });
 
 // Interceptor to attach Authorization header if token exists in localStorage (fixes Safari & Brave third-party cookie blocking)

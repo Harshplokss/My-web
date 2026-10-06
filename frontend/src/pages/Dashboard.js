@@ -43,10 +43,12 @@ export default function Dashboard() {
   const [data, setData] = useState(null);
   const [levels, setLevels] = useState([]);
   const [teamStandings, setTeamStandings] = useState(null);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { checkAuth } = useAuth();
 
   const load = async () => {
+    setError(null);
     try {
       const [pRes, lRes, tRes] = await Promise.all([
         api.get("/progress"),
@@ -58,6 +60,7 @@ export default function Dashboard() {
       if (tRes) setTeamStandings(tRes.data);
     } catch (e) {
       console.error(e);
+      setError(e.response?.data?.detail || e.message || "Could not connect to backend server");
     }
   };
 
@@ -74,6 +77,24 @@ export default function Dashboard() {
       toast.error("Could not set team");
     }
   };
+
+  if (error) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-[#040D1A] p-6 text-center">
+        <div className="max-w-md flex flex-col items-center gap-4">
+          <div className="text-4xl text-amber-500">⚓</div>
+          <h2 className="font-accent text-[#D4AF37] text-lg tracking-widest">SERVER UNREACHABLE</h2>
+          <p className="text-gray-400 text-sm">{error}</p>
+          <button 
+            onClick={load}
+            className="px-6 py-2 bg-[#D4AF37] text-black font-semibold rounded hover:opacity-90 transition-opacity"
+          >
+            Retry Connection
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!data) {
     return (

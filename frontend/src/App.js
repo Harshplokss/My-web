@@ -29,13 +29,18 @@ function FullScreenLoader() {
 
 function AppRouter() {
   const location = useLocation();
-  // Synchronous hash check to handle OAuth callback before ProtectedRoute runs
-  if (location.hash?.includes("session_id=")) {
+  // Synchronous check for session_id in hash or search
+  const isAuthCallback = location.pathname === "/auth/callback" ||
+    location.hash?.includes("session_id=") ||
+    location.search?.includes("session_id=");
+
+  if (isAuthCallback) {
     return <AuthCallback />;
   }
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
       <Route path="/level/:num" element={<Protected><LevelPlay /></Protected>} />
       <Route path="/arc/:id" element={<Protected><LevelPlay /></Protected>} />
