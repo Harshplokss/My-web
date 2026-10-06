@@ -17,18 +17,42 @@ export default function LevelPlay() {
   const [state, setState] = useState("idle"); // idle | wrong | correct | level_done
   const [error, setError] = useState(null);
   const [showHint, setShowHint] = useState(false);
+  const [unlockedHintText, setUnlockedHintText] = useState(null);
 
   const fetchQuestion = async () => {
     setError(null);
     setShowHint(false);
+    setUnlockedHintText(null);
     try {
       const r = await api.get(`/levels/${levelNum}/question`);
       setData(r.data);
       setAnswer("");
       setState("idle");
+      if (r.data.question?.hint_unlocked && r.data.question?.hint) {
+        setUnlockedHintText(r.data.question.hint);
+      }
       if (r.data.level_completed) setState("level_done");
     } catch (e) {
       setError(e.response?.data?.detail || "Cannot load level");
+    }
+  };
+
+  const unlockHint = async () => {
+    SoundManager.playHint();
+    if (data?.question?.hint_unlocked || data?.question?.hint || unlockedHintText) {
+      setUnlockedHintText(data?.question?.hint || unlockedHintText || "Look for double meanings in the prompt.");
+      setShowHint(true);
+      return;
+    }
+    try {
+      const r = await api.post(`/levels/${levelNum}/hint`);
+      setUnlockedHintText(r.data.hint);
+      setShowHint(true);
+      if (r.data.unlocked) {
+        toast.info("⚓ Hint Unlocked!", { description: `Deducted ${r.data.cost} Berry score` });
+      }
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Could not unlock hint");
     }
   };
 
@@ -192,14 +216,11 @@ export default function LevelPlay() {
           <div className="mt-4">
             {!showHint ? (
               <button
-                onClick={() => {
-                  SoundManager.playHint();
-                  setShowHint(true);
-                }}
+                onClick={unlockHint}
                 className="inline-flex items-center gap-2 text-xs font-accent tracking-widest text-[#D4AF37]/80 hover:text-[#D4AF37] bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border border-[#D4AF37]/30 px-3.5 py-1.5 rounded-full transition"
                 data-testid="reveal-hint-btn"
               >
-                <Eye size={14} /> REVEAL ANCIENT CLUE HINT
+                <Eye size={14} /> {q.hint_unlocked ? "SHOW UNLOCKED HINT" : "UNLOCK HINT (-2 BERRY)"}
               </button>
             ) : (
               <motion.div
@@ -211,7 +232,7 @@ export default function LevelPlay() {
                 <HelpCircle size={18} className="text-[#D4AF37] shrink-0 mt-0.5" />
                 <div className="text-xs text-gray-300">
                   <span className="font-accent text-[#D4AF37] tracking-wider block mb-1">CLUE ADVICE:</span>
-                  {q.hint || "Look for double meanings in the numbers and key words of the prompt."}
+                  {unlockedHintText || q.hint || "Look for double meanings in the numbers and key words of the prompt."}
                 </div>
               </motion.div>
             )}

@@ -286,13 +286,16 @@ async def get_current_question(number: int, request: Request):
     if q_idx >= len(questions):
         return {"level_completed": True, "level": {"number": number, "title": lvl["title"], "subtitle": lvl.get("subtitle", "")}}
     q = questions[q_idx]
-    # Hidden mode: server returns only metadata, NEVER the prompt/options/image.
-    # Players solve riddles distributed offline and just submit answers here.
+    unlocked_hints = set(prog.get("unlocked_hints", []))
+    is_hint_unlocked = q["question_id"] in unlocked_hints
     safe_q = {
         "question_id": q["question_id"],
         "order": q.get("order", 0),
         "prompt": q.get("prompt"),
-        "hint": q.get("hint"),
+        "hint_available": bool(q.get("hint")),
+        "hint_unlocked": is_hint_unlocked,
+        "hint": q.get("hint") if is_hint_unlocked else None,
+        "hint_cost": 2,
         "type": q.get("type", "riddle"),
         "image_url": q.get("image_url"),
         "options": q.get("options", []),
@@ -364,6 +367,44 @@ async def submit_answer(number: int, request: Request):
     else:
         await db.progress.update_one({"user_id": user["user_id"]}, update_doc)
         return {"correct": False, "message": "Try Again"}
+
+@api.post("/levels/{number}/hint")
+async def unlock_hint(number: int, request: Request):
+    """Unlocks a hint for the current question by deducting 2 bounty/score points."""
+    user = await require_user(request)
+    prog = await get_or_create_progress(user["user_id"])
+    current = prog.get("current_level", 1)
+    if number != current:
+        raise HTTPException(status_code=403, detail="Not your current level")
+    lvl = await db.levels.find_one({"number": number}, {"_id": 0})
+    if not lvl or lvl.get("is_locked_override"):
+        raise HTTPException(status_code=403, detail="Level unavailable")
+    questions = visible_questions(lvl)
+    q_idx = prog.get("current_question_index", 0)
+    if q_idx >= len(questions):
+        raise HTTPException(status_code=400, detail="No active question")
+    q = questions[q_idx]
+    hint = q.get("hint")
+    if not hint:
+        raise HTTPException(status_code=404, detail="No hint available for this question")
+    qid = q["question_id"]
+    unlocked_hints = set(prog.get("unlocked_hints", []))
+    if qid in unlocked_hints:
+        return {"hint": hint, "already_unlocked": True, "score": prog.get("score", 0)}
+    current_score = prog.get("score", 0)
+    HINT_COST = 2
+    new_score = max(0, current_score - HINT_COST)
+    unlocked_hints.add(qid)
+    await db.progress.update_one(
+        {"user_id": user["user_id"]},
+        {
+            "$set": {
+                "score": new_score,
+                "unlocked_hints": list(unlocked_hints),
+            }
+        }
+    )
+    return {"hint": hint, "unlocked": True, "score": new_score, "cost": HINT_COST}
 
 @api.get("/leaderboard")
 async def leaderboard(request: Request):
