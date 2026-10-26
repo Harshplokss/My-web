@@ -18,6 +18,7 @@ import logging
 import io
 import csv
 import httpx
+from lore_and_merch_data import DEFAULT_THEORIES, DEFAULT_MERCH
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
@@ -76,7 +77,60 @@ class Progress(BaseModel):
     completed_at: Optional[datetime] = None
     answers_log: List[dict] = []  # {level, q_idx, attempts, correct_at}
 
+
+class ComicPage(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    chapter: Optional[str] = "Chapter Ref"
+    title: Optional[str] = ""
+    image_url: str
+    caption: Optional[str] = ""
+
+class Theory(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    theory_id: str = Field(default_factory=lambda: f"th_{uuid.uuid4().hex[:10]}")
+    title: str
+    summary: str
+    full_text: str
+    source_type: str = "reddit"
+    source_name: str = "r/OnePiece"
+    source_url: Optional[str] = None
+    author: str = "Anonymous Scholar"
+    category: str = "Void Century"
+    has_spoilers: bool = False
+    comic_pages: List[ComicPage] = []
+    upvotes: int = 0
+    downvotes: int = 0
+    voted_user_ids: List[str] = []
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class MerchItem(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    item_id: str = Field(default_factory=lambda: f"item_{uuid.uuid4().hex[:10]}")
+    name: str
+    category: str = "figures"
+    price_usd: float = 29.99
+    price_berry: int = 3000000
+    store_name: str = "Crunchyroll Store"
+    store_url: str = "https://store.crunchyroll.com"
+    image_url: str = ""
+    description: str = ""
+    rating: float = 4.9
+    badge: Optional[str] = None
+    in_stock: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 # ===== Helpers =====
+def parse_dt(dt_val) -> datetime:
+    if isinstance(dt_val, datetime):
+        return dt_val if dt_val.tzinfo else dt_val.replace(tzinfo=timezone.utc)
+    if isinstance(dt_val, str):
+        try:
+            d = datetime.fromisoformat(dt_val)
+            return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+        except Exception:
+            pass
+    return datetime.now(timezone.utc)
+
 def serialize_dt(doc: dict) -> dict:
     for k, v in list(doc.items()):
         if isinstance(v, datetime):
@@ -285,6 +339,36 @@ async def get_current_question(number: int, request: Request):
     q_idx = prog.get("current_question_index", 0) if number == current else 0
     if q_idx >= len(questions):
         return {"level_completed": True, "level": {"number": number, "title": lvl["title"], "subtitle": lvl.get("subtitle", "")}}
+
+    # ===== Anti-Spam Rate Limiting =====
+    now = datetime.now(timezone.utc)
+    answers_log = prog.get("answers_log", [])
+    if answers_log:
+        last_log = answers_log[-1]
+        last_at_str = last_log.get("at")
+        if last_at_str:
+            last_at = parse_dt(last_at_str)
+            seconds_since_last = (now - last_at).total_seconds()
+            if seconds_since_last < 3.0:
+                wait_sec = max(1, int(4.0 - seconds_since_last))
+                raise HTTPException(
+                    status_code=429,
+                    detail=f"Slow down, pirate! Please wait {wait_sec}s between attempts."
+                )
+
+        cutoff_60s = now - timedelta(seconds=60)
+        recent_wrongs = [
+            l for l in answers_log
+            if not l.get("correct") and l.get("at") and parse_dt(l.get("at")) > cutoff_60s
+        ]
+        if len(recent_wrongs) >= 5:
+            earliest_wrong = parse_dt(recent_wrongs[0].get("at"))
+            cooldown_left = max(1, int(60 - (now - earliest_wrong).total_seconds()))
+            raise HTTPException(
+                status_code=429,
+                detail=f"Too many incorrect guesses! Cooldown active for {cooldown_left}s."
+            )
+
     q = questions[q_idx]
     unlocked_hints = set(prog.get("unlocked_hints", []))
     is_hint_unlocked = q["question_id"] in unlocked_hints
@@ -629,6 +713,188 @@ async def root():
     return {"service": "Treasure Hunt API", "status": "ok"}
 
 # Register router
+
+# ===== Theories & Rumors Endpoints =====
+IN_MEMORY_THEORIES = [dict(t) for t in DEFAULT_THEORIES]
+IN_MEMORY_MERCH = [dict(m) for m in DEFAULT_MERCH]
+
+@api.get("/theories")
+async def get_theories(
+    category: Optional[str] = None,
+    source: Optional[str] = None,
+    search: Optional[str] = None,
+    sort: str = "top"
+):
+    results = []
+    try:
+        cursor = db.theories.find({}, {"_id": 0})
+        db_theories = await cursor.to_list(100)
+        if not db_theories:
+            await db.theories.insert_many([dict(t) for t in DEFAULT_THEORIES])
+            results = [dict(t) for t in DEFAULT_THEORIES]
+        else:
+            results = db_theories
+    except Exception as e:
+        logger.warning(f"Using in-memory theories fallback: {e}")
+        results = [dict(t) for t in IN_MEMORY_THEORIES]
+
+    if category and category.lower() != "all":
+        results = [t for t in results if t.get("category", "").lower() == category.lower()]
+    if source and source.lower() != "all":
+        results = [t for t in results if t.get("source_type", "").lower() == source.lower()]
+    if search:
+        s = search.lower()
+        results = [
+            t for t in results
+            if s in t.get("title", "").lower()
+            or s in t.get("summary", "").lower()
+            or s in t.get("full_text", "").lower()
+            or s in t.get("author", "").lower()
+        ]
+
+    if sort == "newest":
+        results.reverse()
+    else:
+        results.sort(key=lambda x: x.get("upvotes", 0) - x.get("downvotes", 0), reverse=True)
+
+    return {"theories": results}
+
+@api.post("/theories")
+async def create_theory(request: Request):
+    body = await request.json()
+    title = (body.get("title") or "").strip()
+    summary = (body.get("summary") or "").strip()
+    full_text = (body.get("full_text") or "").strip()
+    if not title or not summary:
+        raise HTTPException(status_code=400, detail="Title and summary are required")
+
+    theory_id = f"th_{uuid.uuid4().hex[:10]}"
+    comic_pages = []
+    for cp in body.get("comic_pages", []):
+        if cp.get("image_url"):
+            comic_pages.append({
+                "chapter": cp.get("chapter", "Chapter Ref"),
+                "title": cp.get("title", ""),
+                "image_url": cp.get("image_url"),
+                "caption": cp.get("caption", "")
+            })
+
+    doc = {
+        "theory_id": theory_id,
+        "title": title,
+        "summary": summary,
+        "full_text": full_text or summary,
+        "source_type": body.get("source_type", "community"),
+        "source_name": body.get("source_name", "Community Theorist"),
+        "source_url": body.get("source_url", ""),
+        "author": body.get("author", "Straw Hat Fan"),
+        "category": body.get("category", "Void Century"),
+        "has_spoilers": bool(body.get("has_spoilers", False)),
+        "comic_pages": comic_pages,
+        "upvotes": 1,
+        "downvotes": 0,
+        "voted_user_ids": [],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+
+    try:
+        await db.theories.insert_one(doc)
+    except Exception as e:
+        logger.warning(f"Error inserting into db: {e}")
+    IN_MEMORY_THEORIES.insert(0, doc)
+
+    return {"ok": True, "theory": doc}
+
+@api.post("/theories/{theory_id}/vote")
+async def vote_theory(theory_id: str, request: Request):
+    body = await request.json()
+    direction = body.get("direction", "up")
+
+    target = None
+    for t in IN_MEMORY_THEORIES:
+        if t.get("theory_id") == theory_id:
+            target = t
+            break
+
+    delta_up = 1 if direction == "up" else 0
+    delta_down = 1 if direction == "down" else 0
+
+    if target:
+        target["upvotes"] = target.get("upvotes", 0) + delta_up
+        target["downvotes"] = target.get("downvotes", 0) + delta_down
+
+    try:
+        inc_field = {"upvotes": delta_up, "downvotes": delta_down}
+        await db.theories.update_one(
+            {"theory_id": theory_id},
+            {"$inc": inc_field}
+        )
+    except Exception as e:
+        logger.warning(f"Error updating theory vote: {e}")
+
+    return {
+        "ok": True,
+        "upvotes": target["upvotes"] if target else delta_up,
+        "downvotes": target["downvotes"] if target else delta_down
+    }
+
+# ===== Merch & Goodies Endpoints =====
+@api.get("/merch")
+async def get_merch(
+    category: Optional[str] = None,
+    store: Optional[str] = None,
+    search: Optional[str] = None,
+    sort: str = "popular"
+):
+    results = []
+    try:
+        cursor = db.merch.find({}, {"_id": 0})
+        db_merch = await cursor.to_list(100)
+        if not db_merch:
+            await db.merch.insert_many([dict(m) for m in DEFAULT_MERCH])
+            results = [dict(m) for m in DEFAULT_MERCH]
+        else:
+            results = db_merch
+    except Exception as e:
+        logger.warning(f"Using in-memory merch fallback: {e}")
+        results = [dict(m) for m in IN_MEMORY_MERCH]
+
+    if category and category.lower() != "all":
+        results = [m for m in results if m.get("category", "").lower() == category.lower()]
+    if store and store.lower() != "all":
+        results = [m for m in results if store.lower() in m.get("store_name", "").lower()]
+    if search:
+        s = search.lower()
+        results = [
+            m for m in results
+            if s in m.get("name", "").lower()
+            or s in m.get("description", "").lower()
+            or s in m.get("category", "").lower()
+            or s in m.get("store_name", "").lower()
+        ]
+
+    if sort == "price_asc":
+        results.sort(key=lambda x: x.get("price_usd", 0))
+    elif sort == "price_desc":
+        results.sort(key=lambda x: x.get("price_usd", 0), reverse=True)
+    elif sort == "rating":
+        results.sort(key=lambda x: x.get("rating", 0), reverse=True)
+
+    return {"merch": results}
+
+@api.get("/merch/{item_id}")
+async def get_single_merch(item_id: str):
+    for m in IN_MEMORY_MERCH:
+        if m.get("item_id") == item_id:
+            return {"item": m}
+    try:
+        item = await db.merch.find_one({"item_id": item_id}, {"_id": 0})
+        if item:
+            return {"item": item}
+    except Exception:
+        pass
+    raise HTTPException(status_code=404, detail="Goodie not found in Grand Line Bazaar")
+
 app.include_router(api)
 
 allowed_origins = [

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Anchor, Compass, Map, Shield, Zap, Users } from "lucide-react";
+import { Anchor, Compass, Map, Shield, Zap, Users, BookOpen, ShoppingBag, Sparkles } from "lucide-react";
 import OceanBackground from "../components/OceanBackground";
 import { SoundManager } from "../utils/SoundManager";
 import { useAuth } from "../context/AuthContext";
@@ -225,6 +225,73 @@ export default function Landing() {
         </motion.div>
 
         {/* Features */}
+        
+        {/* New Lore & Merch Discovery Cards */}
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1.2 }}
+            style={{
+              background: 'linear-gradient(135deg, rgba(10,30,53,0.85), rgba(4,13,26,0.95))',
+              border: '1px solid rgba(212,175,55,0.3)',
+              borderRadius: '1.25rem',
+              padding: '1.75rem',
+            }}
+            className="flex flex-col justify-between shadow-2xl relative overflow-hidden group hover:border-yellow-400/60 transition"
+          >
+            <div>
+              <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-yellow-400 uppercase mb-2">
+                <BookOpen size={15} /> The Void Century Archives
+              </div>
+              <h3 className="font-serif text-xl sm:text-2xl font-bold text-white mb-2 group-hover:text-yellow-300 transition">
+                Conspiracy Theories & Rumors
+              </h3>
+              <p className="text-gray-300 text-sm leading-relaxed mb-4">
+                Explore popular One Piece theories, rumors, and predictions from Reddit, Instagram, and Ohara scholars with attached comic panels and community voting.
+              </p>
+            </div>
+            <button
+              onClick={() => { SoundManager.playClick(); navigate("/theories"); }}
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl font-semibold text-xs tracking-wider uppercase bg-yellow-500/10 hover:bg-yellow-500 text-yellow-300 hover:text-black border border-yellow-500/40 transition flex items-center justify-center gap-2 self-start"
+            >
+              <BookOpen size={14} /> Read Theories & Comic Pages →
+            </button>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1.25 }}
+            style={{
+              background: 'linear-gradient(135deg, rgba(10,30,53,0.85), rgba(4,13,26,0.95))',
+              border: '1px solid rgba(212,175,55,0.3)',
+              borderRadius: '1.25rem',
+              padding: '1.75rem',
+            }}
+            className="flex flex-col justify-between shadow-2xl relative overflow-hidden group hover:border-yellow-400/60 transition"
+          >
+            <div>
+              <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-amber-400 uppercase mb-2">
+                <ShoppingBag size={15} /> Grand Line Bazaar
+              </div>
+              <h3 className="font-serif text-xl sm:text-2xl font-bold text-white mb-2 group-hover:text-yellow-300 transition">
+                One Piece Goodies & Merch
+              </h3>
+              <p className="text-gray-300 text-sm leading-relaxed mb-4">
+                Plunder verified action figures (Gear 5 Luffy, Zoro), replica Devil Fruits, hoodies, and Wanted posters with dual USD & Berry pricing and direct merchant links.
+              </p>
+            </div>
+            <button
+              onClick={() => { SoundManager.playClick(); navigate("/merch"); }}
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl font-semibold text-xs tracking-wider uppercase bg-gradient-to-r from-amber-500 to-yellow-600 text-black hover:scale-105 active:scale-95 transition flex items-center justify-center gap-2 self-start shadow-lg shadow-amber-500/20"
+            >
+              <ShoppingBag size={14} /> Plunder Grand Line Merch →
+            </button>
+          </motion.div>
+        </div>
+
+
         <div id="features" className="mt-24 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {FEATURES.map((f, i) => (
             <motion.div

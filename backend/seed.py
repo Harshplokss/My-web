@@ -11,8 +11,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 load_dotenv(Path(__file__).parent / ".env")
 
-client = AsyncIOMotorClient(os.environ["MONGO_URL"])
-db = client[os.environ["DB_NAME"]]
+client = AsyncIOMotorClient(os.environ.get("MONGO_URL", "mongodb://localhost:27017"))
+db = client[os.environ.get("DB_NAME", "treasure_hunt")]
 
 
 def q(type_, prompt, answer, order, options=None, image_url=None):

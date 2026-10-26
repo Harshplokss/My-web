@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Anchor, LogOut, Trophy, Volume2, VolumeX, Crown } from "lucide-react";
+import { Anchor, LogOut, Trophy, Volume2, VolumeX, Crown, BookOpen, ShoppingBag } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { SoundManager } from "../utils/SoundManager";
 
@@ -87,6 +87,30 @@ export default function NavBar() {
         >
           {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
         </button>
+
+        {/* Theories */}
+        <Link
+          to="/theories"
+          onClick={() => SoundManager.playClick()}
+          style={{ color: '#9CA3AF', display: 'flex', alignItems: 'center', gap: '5px', transition: 'color 0.2s', fontFamily: 'Cinzel,serif', letterSpacing: '0.05em', fontSize: '0.7rem' }}
+          className="hover:text-yellow-400"
+          data-testid="nav-theories"
+        >
+          <BookOpen size={15} />
+          <span className="hidden md:inline">THEORIES</span>
+        </Link>
+
+        {/* Bazaar */}
+        <Link
+          to="/merch"
+          onClick={() => SoundManager.playClick()}
+          style={{ color: '#9CA3AF', display: 'flex', alignItems: 'center', gap: '5px', transition: 'color 0.2s', fontFamily: 'Cinzel,serif', letterSpacing: '0.05em', fontSize: '0.7rem' }}
+          className="hover:text-yellow-400"
+          data-testid="nav-bazaar"
+        >
+          <ShoppingBag size={15} />
+          <span className="hidden md:inline">BAZAAR</span>
+        </Link>
 
         {/* Leaderboard */}
         <Link

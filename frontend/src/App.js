@@ -10,6 +10,8 @@ import LevelPlay from "./pages/LevelPlay";
 import Celebration from "./pages/Celebration";
 import Leaderboard from "./pages/Leaderboard";
 import Admin from "./pages/Admin";
+import Theories from "./pages/Theories";
+import MerchBazaar from "./pages/MerchBazaar";
 
 function Protected({ children, adminOnly = false }) {
   const { user, loading } = useAuth();
@@ -46,6 +48,9 @@ function AppRouter() {
       <Route path="/arc/:id" element={<Protected><LevelPlay /></Protected>} />
       <Route path="/celebration" element={<Protected><Celebration /></Protected>} />
       <Route path="/leaderboard" element={<Protected><Leaderboard /></Protected>} />
+      <Route path="/theories" element={<Theories />} />
+      <Route path="/merch" element={<MerchBazaar />} />
+      <Route path="/bazaar" element={<Navigate to="/merch" replace />} />
       <Route path="/admin" element={<Protected adminOnly><Admin /></Protected>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

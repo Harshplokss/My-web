@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Lock, Check, ChevronRight, Award, Flame, Trophy, Shield, Swords, Anchor, Star, Map
+  Lock, Check, ChevronRight, Award, Flame, Trophy, Shield, Swords, Anchor, Star, Map, BookOpen, ShoppingBag, Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
 import NavBar from "../components/NavBar";

@@ -1,6 +1,12 @@
 import axios from "axios";
 
-const BACKEND = process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_API_URL || "http://localhost:8000";
+// Automatically detects local environment vs deployed cloud environment
+const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+
+const BACKEND = isLocal
+  ? (process.env.REACT_APP_LOCAL_API_URL || "http://localhost:8000")
+  : (process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_API_URL || "https://my-web-fekd.onrender.com");
+
 export const API = BACKEND.endsWith('/api') ? BACKEND : `${BACKEND}/api`;
 
 export const api = axios.create({
