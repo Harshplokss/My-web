@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Anchor, LogOut, Trophy, Volume2, VolumeX, Crown, BookOpen, ShoppingBag } from "lucide-react";
+import { Anchor, LogOut, Trophy, Volume2, VolumeX, Crown, BookOpen, ShoppingBag, FileText } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { SoundManager } from "../utils/SoundManager";
 
@@ -110,6 +110,18 @@ export default function NavBar() {
         >
           <ShoppingBag size={15} />
           <span className="hidden md:inline">BAZAAR</span>
+        </Link>
+
+        {/* Wanted Poster */}
+        <Link
+          to="/wanted"
+          onClick={() => SoundManager.playClick()}
+          style={{ color: '#9CA3AF', display: 'flex', alignItems: 'center', gap: '5px', transition: 'color 0.2s', fontFamily: 'Cinzel,serif', letterSpacing: '0.05em', fontSize: '0.7rem' }}
+          className="hover:text-yellow-400"
+          data-testid="nav-wanted"
+        >
+          <FileText size={15} />
+          <span className="hidden md:inline">WANTED</span>
         </Link>
 
         {/* Leaderboard */}

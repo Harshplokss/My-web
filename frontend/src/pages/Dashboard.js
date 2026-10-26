@@ -226,6 +226,78 @@ export default function Dashboard() {
             </motion.div>
           )}
 
+          {/* ── Quick Feature Discovery Cards (Wanted, Theories, Merch) ─── */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div
+              onClick={() => { SoundManager.playClick(); navigate("/wanted"); }}
+              style={{
+                background: 'linear-gradient(135deg, rgba(10,30,53,0.7), rgba(4,13,26,0.85))',
+                border: '1px solid rgba(212,175,55,0.3)',
+                borderRadius: '1rem',
+                padding: '1.25rem',
+                cursor: 'pointer',
+              }}
+              className="hover:border-yellow-400/60 hover:scale-[1.02] transition flex items-center justify-between group shadow-lg"
+            >
+              <div className="flex items-center gap-3">
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(212,175,55,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Award size={20} color="#D4AF37" />
+                </div>
+                <div>
+                  <div style={{ fontFamily: 'Cinzel,serif', fontSize: '0.65rem', letterSpacing: '0.2em', color: '#D4AF37' }}>WANTED POSTER</div>
+                  <div style={{ fontFamily: 'Cinzel,serif', fontSize: '0.85rem', color: '#F3F4F6', fontWeight: 'bold' }}>Forge Bounty Warrant</div>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-gray-400 group-hover:translate-x-1 group-hover:text-yellow-400 transition" />
+            </div>
+
+            <div
+              onClick={() => { SoundManager.playClick(); navigate("/theories"); }}
+              style={{
+                background: 'linear-gradient(135deg, rgba(10,30,53,0.7), rgba(4,13,26,0.85))',
+                border: '1px solid rgba(212,175,55,0.25)',
+                borderRadius: '1rem',
+                padding: '1.25rem',
+                cursor: 'pointer',
+              }}
+              className="hover:border-yellow-400/60 hover:scale-[1.02] transition flex items-center justify-between group shadow-lg"
+            >
+              <div className="flex items-center gap-3">
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(212,175,55,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <BookOpen size={20} color="#D4AF37" />
+                </div>
+                <div>
+                  <div style={{ fontFamily: 'Cinzel,serif', fontSize: '0.65rem', letterSpacing: '0.2em', color: '#D4AF37' }}>LORE ARCHIVES</div>
+                  <div style={{ fontFamily: 'Cinzel,serif', fontSize: '0.85rem', color: '#F3F4F6', fontWeight: 'bold' }}>Theories & Comics</div>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-gray-400 group-hover:translate-x-1 group-hover:text-yellow-400 transition" />
+            </div>
+
+            <div
+              onClick={() => { SoundManager.playClick(); navigate("/merch"); }}
+              style={{
+                background: 'linear-gradient(135deg, rgba(10,30,53,0.7), rgba(4,13,26,0.85))',
+                border: '1px solid rgba(212,175,55,0.25)',
+                borderRadius: '1rem',
+                padding: '1.25rem',
+                cursor: 'pointer',
+              }}
+              className="hover:border-yellow-400/60 hover:scale-[1.02] transition flex items-center justify-between group shadow-lg"
+            >
+              <div className="flex items-center gap-3">
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(212,175,55,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShoppingBag size={20} color="#D4AF37" />
+                </div>
+                <div>
+                  <div style={{ fontFamily: 'Cinzel,serif', fontSize: '0.65rem', letterSpacing: '0.2em', color: '#D4AF37' }}>STRAW HAT BAZAAR</div>
+                  <div style={{ fontFamily: 'Cinzel,serif', fontSize: '0.85rem', color: '#F3F4F6', fontWeight: 'bold' }}>Goodies & Figures</div>
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-gray-400 group-hover:translate-x-1 group-hover:text-yellow-400 transition" />
+            </div>
+          </div>
+
           {/* ── Grand Line Journey Map ─────────────────── */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
             <GrandLineMap levels={levels} currentLevel={data.current_level} />

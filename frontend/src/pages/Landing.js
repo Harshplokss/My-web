@@ -47,7 +47,7 @@ const WantedSplash = () => (
       right: '5%',
       top: '15%',
       width: '160px',
-      display: 'none',
+      cursor: 'pointer',
     }}
     className="hidden lg:block"
   >
@@ -100,7 +100,7 @@ export default function Landing() {
       <OceanBackground showShip />
 
       {/* Wanted Poster */}
-      <WantedSplash />
+      <div onClick={() => { SoundManager.playClick(); navigate("/wanted"); }} title="Forge Your Wanted Poster"><WantedSplash /></div>
 
       {/* Nav */}
       <div className="relative z-20 px-6 sm:px-10 py-5 flex items-center justify-between">
